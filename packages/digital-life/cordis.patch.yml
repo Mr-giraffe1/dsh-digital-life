@@ -1,0 +1,6 @@
+# dsh-digital-life bundle patch: one row, no configuration.
+# The row name MUST equal the package name — the client-modules node half
+# resolves `require.resolve('<row-name>/package.json')` to find the package.
+- insert:
+    - id: digital-life
+      name: 'dsh-digital-life'

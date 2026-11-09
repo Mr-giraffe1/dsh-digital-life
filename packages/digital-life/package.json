@@ -1,0 +1,38 @@
+{
+  "name": "dsh-digital-life",
+  "version": "0.1.0",
+  "description": "DeepSeek Harness 上的数字生命：Host 半常驻的人设/记忆/作息引擎，加一个书房式观察窗面板",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [],
+      "external": []
+    }
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "digital-life",
+    "persona"
+  ],
+  "files": [
+    "lib",
+    "cordis.patch.yml",
+    "README.md"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  }
+}

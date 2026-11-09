@@ -1,0 +1,12 @@
+# 忽略：膨胀的开发用产物
+
+# 解包的 DSH 运行时源码只作为**参考材料**，而且**不要解进工作区**：
+# 355 MB / 12,967 个文件会让任何 glob/grep 扫过 vendor 代码，
+# 上一次会话就是这么把上下文撑爆的（见 INCIDENT.md）。
+# 需要看宿主源码时用 `.scratch/extract-asar.py`（默认解到 %TEMP%\dsh-asar）。
+.scratch/
+
+# 本地临时文件
+*.tmp
+*.log
+node_modules/
