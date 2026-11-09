@@ -10,3 +10,6 @@
 *.tmp
 *.log
 node_modules/
+
+# 一次性发布用的 GitHub token（只在建仓推送时读一次，永不入库）
+.git-token.txt
