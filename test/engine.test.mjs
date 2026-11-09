@@ -134,7 +134,23 @@ applyPlugin(ctx1, { dataRoot: root })
 const server1 = await serve(ctx1.routes)
 let state = await waitForPhase(server1.base, ['unborn', 'alive'])
 check('引擎起来且先是 unborn', state?.phase === 'unborn', state?.phase)
-check('注册了七条路由', ctx1.routes.length === 7, ctx1.routes.map((r) => r.path).join(', '))
+// 7 data routes + the panel bundle + its asset prefix (see the stylesheet's font/art URLs).
+check('注册了九条路由', ctx1.routes.length === 9, ctx1.routes.map((r) => r.path).join(', '))
+check('带上面板与素材路由', ctx1.routes.some((r) => r.path === '/digital-life/client.js') && ctx1.routes.some((r) => r.path === '/digital-life/assets'))
+
+const assetResponse = await fetch(`${server1.base}/digital-life/assets/background.webp`)
+check('素材路由能读到背景图',
+  assetResponse.status === 200 && String(assetResponse.headers.get('content-type')).includes('image/webp'),
+  `${assetResponse.status} ${assetResponse.headers.get('content-type')}`)
+
+const traversal = await fetch(`${server1.base}/digital-life/assets/..%2f..%2fpackage.json`)
+check('素材路由挡住目录穿越', traversal.status === 403 || traversal.status === 404, String(traversal.status))
+
+const bundle = await fetch(`${server1.base}/digital-life/client.js`)
+const bundleBody = await bundle.text()
+check('面板脚本能下载且是新版',
+  bundle.status === 200 && bundleBody.includes('__ModuleLoader__') && bundleBody.includes('dl-console'),
+  `${bundle.status} ${bundleBody.length}B`)
 
 const created = await post(server1.base, { action: 'create', name: '悠悠', addresser: '舅舅' })
 check('创建成功', created.status === 200 && created.body.ok === true, JSON.stringify(created.body).slice(0, 80))

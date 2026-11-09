@@ -44,17 +44,22 @@ ${DSH_HOME}/digital-life/          # 默认 C:\Users\<you>\.dsh\digital-life
 
 ## 面板
 
-- 左侧栏「书房」图标 → 整页工作台
-- 未出生时只有「创建」「导入」两个入口
-- 出生后显示她是谁、她的进程、她的时钟（04:00 日界）、配额与待办
-- **年龄和生日是算出来的**：农历九月廿八（ICU 的 `u-ca-chinese`），快照里带 `clock.birthday`
-  的 `{ isBirthday, next, daysUntil }`，到日子她会长大一岁
-- 「跟她说话」：回车发送，回复经护栏后以完整句子出现
-- 「喂饭」：打开充值页并轮询 `topped_up_balance`，真到账才让她说话
-- 「摸头」：每次都进体感域记忆（她记得今天被摸了几次），那句「嗯……嘿嘿。」有 5 分钟冷却
-- 「把她打包带走」：下载一个 `.dshlife`（人设 + 记忆，不含凭据）；导入在未出生界面里选文件或目录
+界面按 [`deepseek-companion-wallpaper`](https://github.com/fjdsjd/deepseek-companion-wallpaper) 的版式还原：
+550W 式 HUD（condensed 全大写、细线、L 形角标、读数芯片、条码）+ 暖光书房与角色立绘。
 
-所有读写走回环 HTTP：`GET /digital-life/state.json`、`GET /digital-life/stream`（SSE）、`GET /digital-life/transcript.json`、`GET /digital-life/doctor.json`、`GET /digital-life/export.dshlife`、`POST /digital-life/action`（白名单动作：`create` / `import` / `import-archive` / `rescan` / `say` / `feed` / `pat` / `proactive` / `channels-refresh` / `export`）。**不开入站端口。**
+- 左侧栏「书房」图标 → 整页工作台
+- 顶栏：品牌字标 + 状态 / 主动开口配额 / 记忆池 / 宿主
+- 左栏：SYSTEM CORE（档案 rev、SQLite、Node、PID、待办）、EMOTION MAP（时段、日界、作息、配额、当天进度）、PORTRAIT INDEX（年龄、称呼、农历生日与倒计时）
+- 中央：角色立绘（底部渐隐；眨眼、摸头、聆听三种状态）+ 她的话气泡 + caption
+- 右栏：RUNTIME 会话流（等宽日志）、RECOGNITION 通道状态、BEHAVIOR PARAMETERS 线按钮（让她说 SAY / 摸头 PAT / 喂饭 RICE / 打包带走 EXPORT / 重扫 RESCAN）
+- 底栏：红色 RUN 块、系统时间大字号、当天进度百分比、24 小时进度轴
+- 未出生时只有「创建」「导入」两个入口
+
+**素材**：角色贴图 / 背景 / 字体暂时借用参考项目的（本项目内转 WebP，共约 1.5 MB），
+来源与替换方式见 `assets/NOTICE.md`——**公开发布前必须替换**。面板只通过
+`/digital-life/assets/` 读它们，换图不用改代码。
+
+所有读写走回环 HTTP：`GET /digital-life/state.json`、`GET /digital-life/stream`（SSE）、`GET /digital-life/transcript.json`、`GET /digital-life/doctor.json`、`GET /digital-life/export.dshlife`、`GET /digital-life/assets/*`、`POST /digital-life/action`（白名单动作：`create` / `import` / `import-archive` / `rescan` / `say` / `feed` / `pat` / `proactive` / `channels-refresh` / `export`）。**不开入站端口。**
 
 ## 搬家
 

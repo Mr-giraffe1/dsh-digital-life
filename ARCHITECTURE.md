@@ -510,6 +510,36 @@ CREATE TABLE kv (k TEXT PRIMARY KEY, v TEXT NOT NULL);   -- 心情快照等
 | GET | `/digital-life/export.dshlife` | 下载导出包（路径由浏览器管） |
 | POST | `/digital-life/action` | **白名单动作**：`create` / `import` / `import-archive` / `rescan` / `say` / `feed` / `pat` / `proactive` / `channels-refresh` / `export` / `approve` / `reject` |
 | POST | `/digital-life/qq/event` | OneBot 11 事件上报（协议端推过来，不是新监听） |
+| GET | `/digital-life/client.js` | 面板脚本本体（给调试/自建预览用；DSH 自己也从包入口加载它） |
+| GET | `/digital-life/assets/*` | 面板的素材：背景、角色贴图、字体。带目录穿越防护与 MIME 表 |
+
+> **prefix 路由不写尾斜杠。** DSH 的匹配是 `pathname === prefix || pathname.startsWith(prefix + '/')`；
+> 注册成 `/digital-life/assets/` 会变成只匹配 `...assets//`，永远 404。这个坑踩过一次，记在这里。
+
+### 8.1 面板视觉（复刻 550W 式 HUD）`[规范]`
+
+版式与氛围**复刻** [`deepseek-companion-wallpaper`](https://github.com/fjdsjd/deepseek-companion-wallpaper)（MIT 代码）：
+
+```
+┌ 顶栏  品牌字标（condensed 全大写）+ STATE / QUOTA / MEMORY / HOST 四组读数芯片 + 条码 ┐
+│                                                                                    │
+│ 左栏                   中央舞台                          右栏                        │
+│ SYSTEM CORE 核心        角色立绘（底部渐隐）              RUNTIME 会话流（等宽日志）    │
+│  L 形角标 + dl 细线      她的话（奶油色气泡）              RECOGNITION 通道状态芯片     │
+│ EMOTION MAP 此刻        caption「我在这儿呢。」           BEHAVIOR PARAMETERS 线按钮    │
+│ PORTRAIT INDEX 档案                                      （SAY / PAT / RICE）         │
+│                                                                                    │
+└ 底栏 红色 RUN 块 + 系统时间（大字号 digits）+ DAY ELAPSED RATIO + 24 小时进度轴 ────────┘
+```
+
+设计令牌（与参考项目一致）：`--ink #e6edf2 / --muted #b7c3cb / --line rgba(224,235,243,.42)`，
+condensed 用 Barlow Condensed（`Simulator Condensed`），数字用 Oxanium（`Simulator Digits`），
+正文 `Microsoft YaHei UI`；角落 L 形角标、hairline 分隔、半透明读数芯片、重复条纹条码。
+
+**素材策略（N10）**：角色贴图 / 书房背景 / 字体**暂时**用参考项目的（本项目内转 WebP，共 1.5 MB），
+来源与替换方式写在 `packages/digital-life/assets/NOTICE.md`；**公开发布前必须替换**。
+面板只经过 `/digital-life/assets/` 读它们，换图不改代码。
+
 
 > `approve` / `reject` 是 P3/P6 的审批动作，路由留位、**尚未实现**（见 §13 P3）。
 
@@ -645,6 +675,7 @@ export(A) → import(B) → export(B)
 | **P1** | desktop 通道端到端：文字收发 → 进记忆 → 召回 → voice 层 | 悠悠用小朋友语气回你，关掉 UI 后仍在服务；重启记忆还在 | **代码完成、离线全绿**；真实模型复验等一次重启 |
 | **P2** | life engine：作息/配额/夜间待办/体感域 + 喂饭互动 + 主动开口 | 熬夜次日记 `violation` 且配额 −1；充值后她主动说那句话；夜里 4 条消息唤醒 | **代码完成、离线全绿**；真实模型与充值需一次重启 |
 | **P2.6** | 农历生日/年龄 + 摸头 | 生日当天算对年龄；摸头进记忆且那句有冷却 | **完成**（离线全绿，实机探针验过路由） |
+| **P2.7** | 面板按参考项目版式还原（550W HUD + 暖光书房） | 三栏 HUD、底部大时钟与进度轴、角色立绘进画面；素材走 `/digital-life/assets/` | **完成**（本地 headless 渲染比对过；素材为占位，见 N10） |
 | **P3** | QQ 通道 + 手机审批 | 在手机上收到审批卡并回「批」，消息真的发出 | 适配器完成、假协议端全绿；需真实 OneBot 端点收尾 |
 | **P4** | B 站只读（bilibili-mcp 复用） | 能搜、能读字幕评论，**不能发** | 未开始 |
 | **P5** | 导出导入 + round-trip 测试 | `export → import → export` 哈希相等；坏版本被拒且原数据不变 | **完成**（离线全绿） |

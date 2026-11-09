@@ -13,7 +13,8 @@
 
 import { hostname } from 'node:os'
 import { createRequire } from 'node:module'
-import { join, resolve } from 'node:path'
+import { dirname, extname, join, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { readFile, writeFile } from 'node:fs/promises'
 import { isAbsolutePath, isInside, machineName, resolveRoots } from './paths.js'
 import { LifeStore } from './store.js'
@@ -37,6 +38,34 @@ const ROUTE_TRANSCRIPT = '/digital-life/transcript.json'
 const ROUTE_EXPORT = '/digital-life/export.dshlife'
 const ROUTE_DOCTOR = '/digital-life/doctor.json'
 const ROUTE_QQ_EVENT = '/digital-life/qq/event'
+const ROUTE_CLIENT = '/digital-life/client.js'
+// No trailing slash: DSH's prefix match is `pathname === prefix || startswith(prefix + '/')`,
+// so registering '/digital-life/assets/' would only ever match '...assets//'.
+const ROUTE_ASSETS = '/digital-life/assets'
+
+/**
+ * Where the panel's own files live: the client bundle and the artwork/fonts.
+ *
+ * Served from `<package>/assets`, resolved off this module's real path — the
+ * package is installed as a junction, so `import.meta.url` is the only reliable
+ * anchor (never assume cwd).
+ */
+const PACKAGE_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
+const ASSET_ROOT = join(PACKAGE_ROOT, 'assets')
+
+/** MIME types for the handful of asset kinds the panel uses. */
+const ASSET_TYPES = new Map([
+  ['.webp', 'image/webp'],
+  ['.png', 'image/png'],
+  ['.jpg', 'image/jpeg'],
+  ['.svg', 'image/svg+xml'],
+  ['.ttf', 'font/ttf'],
+  ['.woff2', 'font/woff2'],
+  ['.css', 'text/css; charset=utf-8'],
+  ['.js', 'application/javascript; charset=utf-8'],
+  ['.json', 'application/json; charset=utf-8'],
+  ['.md', 'text/markdown; charset=utf-8']
+])
 
 /** Request bodies for these actions are tiny; anything larger is hostile. */
 const MAX_BODY_BYTES = 64 * 1024
@@ -1114,4 +1143,82 @@ export function apply(ctx, config) {
       }
     }
   }), `digital-life: POST ${ROUTE_QQ_EVENT}`)
+
+  // The panel's own files. Served over the same loopback surface as the data
+  // routes — no new listener, nothing reachable from off-box (invariant I2).
+  ctx.effect(() => ctx.webServer.register({
+    kind: 'exact',
+    path: ROUTE_CLIENT,
+    handler: async (req, res) => {
+      if (req.method !== 'GET' && req.method !== 'HEAD') {
+        res.statusCode = 405
+        res.setHeader('allow', 'GET, HEAD')
+        res.end()
+        return
+      }
+      if (!isLoopback(req)) {
+        sendJson(res, 403, { ok: false, error: 'loopback-only' })
+        return
+      }
+      try {
+        const buffer = await readFile(join(PACKAGE_ROOT, 'lib', 'client.js'))
+        res.statusCode = 200
+        res.setHeader('content-type', 'application/javascript; charset=utf-8')
+        // No caching: the client bundle changes while we work on it.
+        res.setHeader('cache-control', 'no-store')
+        res.end(req.method === 'HEAD' ? undefined : buffer)
+      } catch {
+        res.statusCode = 404
+        res.end()
+      }
+    }
+  }), `digital-life: GET ${ROUTE_CLIENT}`)
+
+  ctx.effect(() => ctx.webServer.register({
+    kind: 'prefix',
+    path: ROUTE_ASSETS,
+    handler: async (req, res) => {
+      if (req.method !== 'GET' && req.method !== 'HEAD') {
+        res.statusCode = 405
+        res.setHeader('allow', 'GET, HEAD')
+        res.end()
+        return
+      }
+      if (!isLoopback(req)) {
+        sendJson(res, 403, { ok: false, error: 'loopback-only' })
+        return
+      }
+      let rest
+      try {
+        const url = new URL(String(req.url ?? '/'), 'http://127.0.0.1')
+        rest = decodeURIComponent(url.pathname.slice(ROUTE_ASSETS.length)).replace(/^\/+/, '')
+      } catch {
+        res.statusCode = 400
+        res.end()
+        return
+      }
+      if (rest === '' || rest.includes('\0')) {
+        res.statusCode = 404
+        res.end()
+        return
+      }
+      // Traversal guard: everything served must sit under ASSET_ROOT.
+      const target = resolve(ASSET_ROOT, rest)
+      if (!isInside(ASSET_ROOT, target)) {
+        res.statusCode = 403
+        res.end()
+        return
+      }
+      try {
+        const buffer = await readFile(target)
+        res.statusCode = 200
+        res.setHeader('content-type', ASSET_TYPES.get(extname(target).toLowerCase()) ?? 'application/octet-stream')
+        res.setHeader('cache-control', 'public, max-age=86400')
+        res.end(req.method === 'HEAD' ? undefined : buffer)
+      } catch {
+        res.statusCode = 404
+        res.end()
+      }
+    }
+  }), `digital-life: GET ${ROUTE_ASSETS}`)
 }
