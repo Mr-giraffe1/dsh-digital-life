@@ -132,3 +132,12 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/probe.ps1
 ## 零依赖
 
 只用 `node:` 内建。不是洁癖：包以链接方式进 profile，Node 按真实路径解析 bare import，profile 里的依赖一个都看不见。要引入依赖就得把包复制进去，那样会丢掉「改代码即生效」的开发循环。
+
+## 许可
+
+- **代码**：MIT，见仓库根目录 `LICENSE`。
+- **素材**：`assets/` 下的角色贴图、书房背景与字体**来自第三方**（参考项目
+  [`fjdsjd/deepseek-companion-wallpaper`](https://github.com/fjdsjd/deepseek-companion-wallpaper)），
+  **不在本项目的 MIT 授权范围内**，只作为界面试验的占位。详见 `assets/NOTICE.md`。
+  如果你要分发或商用，请先替换成自己拥有版权（或已获授权）的素材——保持文件名与目录结构即可。
+

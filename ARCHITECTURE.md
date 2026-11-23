@@ -688,7 +688,7 @@ export(A) → import(B) → export(B)
 | 插件双半加载 | 宿主自动扫到新 loader 行，`GET /digital-life/state.json` 返回 200 |
 | 面板 API 钉死 | `main` keyed + `sidebar.panellist`；`test/client.test.mjs` 14 项断言 |
 | 数据根与未出生态 | 空根 → `phase: unborn`；创建后 → `phase: alive` |
-| 创建走通并落盘 | `C:\Users\70465\.dsh\digital-life\` 下 12 个人设文件，中文正确 |
+| 创建走通并落盘 | `%USERPROFILE%\.dsh\digital-life\` 下 12 个人设文件，中文正确 |
 | 拒绝覆盖 | 第二次创建 → 409，原档案一字不动 |
 | 不可识别 schema | → `phase: broken`，不洗成默认值 |
 | 单实例锁 | 活着的 pid 挡住第二个实例；死 pid 被接管；停止心跳删锁 |

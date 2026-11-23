@@ -33,7 +33,7 @@
 
 **(b) 断点前后的两次 turn 记了荒谬的 token 数。**
 
-`C:\Users\70465\.dsh\.dshw-usage.json`（19:31 还有一个 `.before-recharge-fix.bak`，
+`%USERPROFILE%\.dsh\.dshw-usage.json`（19:31 还有一个 `.before-recharge-fix.bak`，
 说明这个记账文件后来被记账插件改写过，数值不能全信，但量级与时间点可用）：
 
 | 时间 | tokens |

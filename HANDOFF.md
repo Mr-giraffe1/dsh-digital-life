@@ -155,7 +155,7 @@ DSH 生态大量使用 `cwd 必须是绝对路径`。写死 `D:\Users\...` 换�
 ## 6. 建议的下一步
 
 1. **优先验证唯一的硬风险**：DSH 侧栏面板 slot 是否存在、API 形状是否支撑「Host 常驻 + Client 观察窗」。
-   - 注意：DSH 安装在 `D:\Users\70465\AppData\Local\Programs\DeepSeek Harness\resources\app.asar`，是**打包的 asar 归档**，不是可读目录树，不能直接 grep。要么解包，要么从可用插件（`dsh-fish-soul` 的左侧栏「鱼」工作台）反推 API。
+   - 注意：DSH 安装在 `%LOCALAPPDATA%\Programs\DeepSeek Harness\resources\app.asar`，是**打包的 asar 归档**，不是可读目录树，不能直接 grep。要么解包，要么从可用插件（`dsh-fish-soul` 的左侧栏「鱼」工作台）反推 API。
 2. 定 `her/` 目录结构与 `manifest.json` schema。
 3. 选一条通道做端到端（建议 B 站，因为 `bilibili-mcp` 现成）。
 
@@ -179,8 +179,8 @@ DSH 生态大量使用 `cwd 必须是绝对路径`。写死 `D:\Users\...` 换�
 
 | 项 | 值 |
 | --- | --- |
-| `DSH_HOME` | `C:\Users\70465\.dsh` |
+| `DSH_HOME` | `%USERPROFILE%\.dsh` |
 | profile | `desktop` |
 | 本工作区路径 | `F:\dsh-digital-life` |
-| 工作区注册表 | `C:\Users\70465\.dsh\storages\workspace.json` |
-| DSH 安装位置 | `D:\Users\70465\AppData\Local\Programs\DeepSeek Harness\resources\app.asar`（打包归档） |
+| 工作区注册表 | `%USERPROFILE%\.dsh\storages\workspace.json` |
+| DSH 安装位置 | `%LOCALAPPDATA%\Programs\DeepSeek Harness\resources\app.asar`（打包归档） |
